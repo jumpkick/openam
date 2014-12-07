@@ -10,7 +10,13 @@ export TOMCAT_CONFIG_FILE="$TOMCAT_HOME/conf/server.xml";
 export KEYSTORE="$TOMCAT_HOME/conf/keystore.jks";
 export KEYSTORE_PWD="changeit";
 export OPENAM_HOME="$CHARM_DIR/openam";
-export PUBLIC_HOSTNAME=$(unit-get public-address);
+
+# export PUBLIC_HOSTNAME=$(unit-get public-address);
+export PUBLIC_HOSTNAME=$(config-get FQDN_OpenAM_alias);
+ if [ -z "$(grep "$(config-get FQDN_OpenAM_alias)" /etc/hosts)" ]; then
+#	echo "$(unit-get public-address) $(config-get FQDN_OpenAM_alias)" >> /etc/hosts
+	echo "127.0.0.1 $(config-get FQDN_OpenAM_alias)" >> /etc/hosts
+fi
 
 function previous_download_ok() {
        DOWNLOAD_FILE=$1
