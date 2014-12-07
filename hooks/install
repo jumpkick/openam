@@ -53,9 +53,9 @@ function install() {
 	cd $CHARM_DIR;
 
 	# Download WAR file
-	rm $CHARM_DIR/$OPENAM_WAR.sha;
+	if [ -e "$CHARM_DIR/$OPENAM_WAR.sha" ]; then rm $CHARM_DIR/$OPENAM_WAR.sha; fi
 	wget -q $REPO_HOME/$OPENAM_WAR.sha;
-	if previous_download_ok $OPENAM_WAR; then
+	if ! previous_download_ok $OPENAM_WAR; then
 		wget -q $REPO_HOME/$OPENAM_WAR;
 	fi
 	SHA_0=$(<$CHARM_DIR/$OPENAM_WAR.sha);
@@ -66,9 +66,9 @@ function install() {
 	fi
 
 	# Download SSOADM archive
-	rm $CHARM_DIR/$SSOADM_FILE.sha;
+	if [ -e "$CHARM_DIR/$SSOADM_FILE.sha"]; then rm $CHARM_DIR/$SSOADM_FILE.sha; fi
 	wget -q $REPO_HOME/$SSOADM_FILE.sha;
-	if previous_download_ok $SSOADM_FILE; then
+	if ! previous_download_ok $SSOADM_FILE; then
 		wget -q $REPO_HOME/$SSOADM_FILE;
 	fi
 	SHA_0=$(<$CHARM_DIR/$SSOADM_FILE.sha);
@@ -79,9 +79,9 @@ function install() {
 	fi
 
 	# Download SSOCONFIGURATOR archive
-	rm $CHARM_DIR/$CONFIGURATOR_FILE.sha;
+	if [ -e "$CHARM_DIR/$CONFIGURATOR_FILE.sha"]; then rm $CHARM_DIR/$CONFIGURATOR_FILE.sha; fi
 	wget -q $REPO_HOME/$CONFIGURATOR_FILE.sha;
-	if previous_download_ok $CONFIGURATOR_FILE; then
+	if ! previous_download_ok $CONFIGURATOR_FILE; then
 		wget -q $REPO_HOME/$CONFIGURATOR_FILE;
 	fi
 	SHA_0=$(<$CHARM_DIR/$CONFIGURATOR_FILE.sha);
