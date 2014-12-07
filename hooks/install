@@ -12,6 +12,24 @@ export KEYSTORE_PWD="changeit";
 export OPENAM_HOME="$CHARM_DIR/openam";
 export PUBLIC_HOSTNAME=$(unit-get public-address);
 
+function previous_download_ok() {
+       DOWNLOAD_FILE=$1
+        if [ -e "$DOWNLOAD_FILE" ]; then
+               SHA_0=$(<$CHARM_DIR/$DOWNLOAD_FILE.sha);
+               SHA_1=$(sha1sum $CHARM_DIR/$DOWNLOAD_FILE | cut -d' ' -f1);
+               if [ "$SHA_0" != "$SHA_1" ]; then
+                       juju-log "Checksum error for previous download of $DOWNLOAD_FILE, removing file for redownload.";
+                       rm "$DOWNLOAD_FILE"
+                       return 1; # Not okay, redownload
+               else
+                       juju-log "Checksum okay for previous download of $DOWNLOAD_FILE, okay to reuse.";
+                       return 0; # Okay, skip download
+               fi
+       fi
+       return 1; # Doesn't exist, redownload.
+}
+
+
 function install() {
 	apt-get -y -qq install unzip openjdk-7-jre tomcat7;
 
@@ -35,8 +53,11 @@ function install() {
 	cd $CHARM_DIR;
 
 	# Download WAR file
-	wget -q $REPO_HOME/$OPENAM_WAR;
+	rm $CHARM_DIR/$OPENAM_WAR.sha;
 	wget -q $REPO_HOME/$OPENAM_WAR.sha;
+	if previous_download_ok $OPENAM_WAR; then
+		wget -q $REPO_HOME/$OPENAM_WAR;
+	fi
 	SHA_0=$(<$CHARM_DIR/$OPENAM_WAR.sha);
 	SHA_1=$(sha1sum $OPENAM_WAR | cut -d' ' -f1);
 	if [ "$SHA_0" != "$SHA_1" ]; then
@@ -45,8 +66,11 @@ function install() {
 	fi
 
 	# Download SSOADM archive
-	wget -q $REPO_HOME/$SSOADM_FILE;
+	rm $CHARM_DIR/$SSOADM_FILE.sha;
 	wget -q $REPO_HOME/$SSOADM_FILE.sha;
+	if previous_download_ok $SSOADM_FILE; then
+		wget -q $REPO_HOME/$SSOADM_FILE;
+	fi
 	SHA_0=$(<$CHARM_DIR/$SSOADM_FILE.sha);
 	SHA_1=$(sha1sum $SSOADM_FILE | cut -d' ' -f1);
 	if [ "$SHA_0" != "$SHA_1" ]; then
@@ -55,9 +79,11 @@ function install() {
 	fi
 
 	# Download SSOCONFIGURATOR archive
-	wget -q $REPO_HOME/$CONFIGURATOR_FILE;
+	rm $CHARM_DIR/$CONFIGURATOR_FILE.sha;
 	wget -q $REPO_HOME/$CONFIGURATOR_FILE.sha;
-
+	if previous_download_ok $CONFIGURATOR_FILE; then
+		wget -q $REPO_HOME/$CONFIGURATOR_FILE;
+	fi
 	SHA_0=$(<$CHARM_DIR/$CONFIGURATOR_FILE.sha);
 	SHA_1=$(sha1sum $CONFIGURATOR_FILE | cut -d' ' -f1);
 	if [ "$SHA_0" != "$SHA_1" ]; then
